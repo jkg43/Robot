@@ -163,6 +163,9 @@ enum Condition
     D_GOTO_SERVING,
     D_SERVE_BURGER,
     D_HANDOFF_DELTA,
+    D_MAKE_BURGER,
+    D_MAKE_CHEESE_PLATE,
+    D_MAKE_SALAD,
 };
 
 enum Sequence
@@ -253,6 +256,8 @@ enum Side
 {
     SIDE_LEFT = 0,
     SIDE_RIGHT = 1,
+    SIDE_LEFT_DONT_ENABLE = 2,
+    SIDE_RIGHT_DONT_ENABLE = 3,
 };
 
 enum PWMChannel

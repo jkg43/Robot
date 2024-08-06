@@ -78,6 +78,8 @@ void clearEvents()
     g.motorOn = false;
     g.fullMotorOn = false;
     g.handoffReady = false;
+    g.timer = 0;
+    g.timerStart = 0;
     
     
 }

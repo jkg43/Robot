@@ -36,19 +36,30 @@ void activateSequence(Sequence s, int arg)
             addConditionalEvent(param(REVERSE_DRIVE_DELAY)+2,getSensorCondition((Side)arg),E_PROCESS_EVENTS,D_STOP);
             break;
         case S_NEXT_TAPE:
-            addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
-            addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_ACTIVATE_SEQUENCE,S_STOP_MOTOR,arg);
+            if(arg == SIDE_LEFT || arg == SIDE_RIGHT)
+            {
+                addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
+            }
             addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_PROCESS_EVENTS,D_NEXT_TAPE);
+            addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_ACTIVATE_SEQUENCE,S_STOP_MOTOR,arg);
             break;
         case S_NEXT_TAPE_SKIP_1:
-            addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
-            addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_ACTIVATE_SEQUENCE,S_NEXT_TAPE,arg);
+            if(arg == SIDE_LEFT || arg == SIDE_RIGHT)
+            {
+                addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
+            }
             addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_PROCESS_EVENTS,D_SKIP_1);
+            addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_ACTIVATE_SEQUENCE,S_NEXT_TAPE,
+                convertSideToDontEnable((Side)arg));
             break;
         case S_NEXT_TAPE_SKIP_2:
-            addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
-            addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_ACTIVATE_SEQUENCE,S_NEXT_TAPE_SKIP_1,arg);
+            if(arg == SIDE_LEFT || arg == SIDE_RIGHT)
+            {
+                addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
+            }
             addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_PROCESS_EVENTS,D_SKIP_2);
+            addConditionalEvent(param(SKIP_DELAY),getSensorCondition((Side)arg),E_ACTIVATE_SEQUENCE,S_NEXT_TAPE_SKIP_1,
+                convertSideToDontEnable((Side)arg));
             break;
         case S_ENDURANCE_TEST:
             addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
@@ -184,7 +195,7 @@ void activateSequence(Sequence s, int arg)
             
         #if ROBOT == 1
         case S_HANDOFF_DELTA:
-            _EVT_A(E_MOTOR_PWM_ON,param(MOTOR_SPEED_FAST) * sign(param(HANDOFF_DELTA)) * arg);
+            _EVT_A(E_MOTOR_PWM_ON,param(MOTOR_SPEED_SLOW) * sign(param(HANDOFF_DELTA)) * arg);
             _EVT_T(abs(param(HANDOFF_DELTA)),E_MOTOR_PWM_OFF);
             _END_SEQ_T(abs(param(HANDOFF_DELTA)),D_HANDOFF_DELTA);
             break;
@@ -214,7 +225,7 @@ void activateSequence(Sequence s, int arg)
             break;
         case S_STAGE_1:
             g.stage = 1;
-            _SWITCH;
+            _SPEED(p(MOTOR_SPEED_SLOW) * -1);
             _SEQ_TA(1,S_MOVE_1_GRAB,SIDE_RIGHT); //grab cheese
 
             _SEQ_CT(2,D_MOVE_1_GRAB,S_STAGE_2);
@@ -227,7 +238,8 @@ void activateSequence(Sequence s, int arg)
             break;
         case S_STAGE_3:
             g.stage = 3;
-            _SWITCH;
+            _SPEED(p(MOTOR_SPEED_FAST));
+
             _SEQ_TA(1,S_NEXT_TAPE_SKIP_1,SIDE_LEFT); //go to cooktop
 
             _SEQ_CA(D_STOP,S_HANDOFF_DELTA,1); //handoff delta
@@ -247,6 +259,7 @@ void activateSequence(Sequence s, int arg)
             break;
         case S_STAGE_5:
             g.stage = 5;
+            _SPEED(p(MOTOR_SPEED_SLOW));
             _SEQ_A(S_NEXT_TAPE,SIDE_LEFT); //go to plates
             _SEQ_CA(D_STOP,S_GRAB_FOOD,SIDE_RIGHT); //grab lettuce
 
@@ -254,7 +267,7 @@ void activateSequence(Sequence s, int arg)
             break;
         case S_STAGE_6:
             g.stage = 6;
-            _SWITCH;
+            _SPEED(p(MOTOR_SPEED_FAST) * -1);
             _SEQ_TA(1,S_NEXT_TAPE_SKIP_1,SIDE_LEFT); //go to cutting
 
             _SEQ_CA(D_STOP,S_HANDOFF_DELTA,-1); //handoff delta
@@ -274,8 +287,11 @@ void activateSequence(Sequence s, int arg)
             break;
         case S_STAGE_8:
             g.stage = 8;
-            _SWITCH;
+            _SPEED(p(MOTOR_SPEED_FAST));
+
             _SEQ_TA(1,S_NEXT_TAPE_SKIP_1,SIDE_LEFT); //go to plates
+            _SPEED_C(D_SKIP_1,p(MOTOR_SPEED_SLOW));
+
             _SEQ_CT(2,D_STOP,S_GRAB_PLATE); //grab plate
 
             _SEQ_CT(1,D_GRAB_PLATE,S_STAGE_9);
@@ -285,6 +301,7 @@ void activateSequence(Sequence s, int arg)
             _SWITCH;
             _SEQ(S_GOTO_SERVING_AREA); //go to serving area
             _SEQ_C(D_GOTO_SERVING,S_SERVE_BURGER); //serve burger
+            _END_SEQ_C(D_SERVE_BURGER,D_MAKE_BURGER);
             break;
 
         
@@ -297,20 +314,21 @@ void activateSequence(Sequence s, int arg)
             break;
         case S_CHEESE_PLATE_STAGE_1:
             _SEQ_A(S_NEXT_TAPE_SKIP_2,SIDE_LEFT); //go to plates
+            _SPEED_C(D_SKIP_1,p(MOTOR_SPEED_SLOW));
 
             _SEQ_C(D_STOP,S_GRAB_PLATE); //grab plate
 
             _SEQ_CT(1,D_GRAB_PLATE,S_CHEESE_PLATE_STAGE_2);
             break;
         case S_CHEESE_PLATE_STAGE_2:
-            _SWITCH;
             _SEQ(S_GOTO_SERVING_AREA); //go to serving area
             _SEQ_C(D_GOTO_SERVING,S_SERVE_BURGER); //serve cheese plate
             _SEQ_CT(1,D_SERVE_BURGER,S_CHEESE_PLATE_STAGE_3);
             break;
         case S_CHEESE_PLATE_STAGE_3:
+            _SWITCH;
             _SEQ_A(S_NEXT_TAPE,SIDE_RIGHT);
-            _SWITCH_C(D_STOP);
+            _END_SEQ_C(D_STOP,D_MAKE_CHEESE_PLATE);
             break;
 
         //SALAD PLATE ROUTINE
@@ -322,6 +340,7 @@ void activateSequence(Sequence s, int arg)
             break;
         case S_SALAD_PLATE_STAGE_1:
             _SEQ_A(S_NEXT_TAPE_SKIP_2,SIDE_LEFT); //go to plates
+            _SPEED_C(D_SKIP_1,p(MOTOR_SPEED_SLOW));
 
             _SEQ_CA(D_STOP,S_GRAB_FOOD,SIDE_RIGHT); //grab lettuce
 
@@ -333,16 +352,16 @@ void activateSequence(Sequence s, int arg)
             _SEQ_CT(1,D_GRAB_PLATE,S_SALAD_PLATE_STAGE_3);
             break;
         case S_SALAD_PLATE_STAGE_3:
-            _SWITCH;
             _SEQ(S_GOTO_SERVING_AREA); //go to serving area
             _SEQ_C(D_GOTO_SERVING,S_SERVE_BURGER); //serve salad plate
 
             _SEQ_CT(1,D_SERVE_BURGER,S_SALAD_PLATE_STAGE_4);
             break;
         case S_SALAD_PLATE_STAGE_4:
+            _SPEED(p(MOTOR_SPEED_FAST) * -1);
+            _EVT_CA(C_LEFT_TAPE_SENSOR,E_MOTOR_PWM_ON,p(MOTOR_SPEED_SLOW ) * -1);
             _SEQ_A(S_NEXT_TAPE,SIDE_RIGHT);
-            _SWITCH_C(D_STOP);
-            // _SEQ_CT(1,D_NEXT_TAPE,S_SALAD_PLATE_STAGE_0);
+            _END_SEQ_C(D_STOP,D_MAKE_SALAD);
             break;
 
         #elif ROBOT == 2
@@ -440,14 +459,15 @@ void activateEvent(EventName name, int arg1, int arg2)
             g.enableLed = false;
             break;
         case E_MOTOR_PWM_ON:
-            if(!g.motorOn)
-            {
-                g.motorOn = true;
-                enable_pwm(DRIVE_FWD_CHANNEL,DRIVE_REV_CHANNEL,arg1);
-            }
+            // if(!g.motorOn)
+            // {
+            //     g.motorOn = true;
+            //     enable_pwm(DRIVE_FWD_CHANNEL,DRIVE_REV_CHANNEL,arg1);
+            // }
+            enable_pwm(DRIVE_FWD_CHANNEL,DRIVE_REV_CHANNEL,arg1);
             break;
         case E_MOTOR_PWM_OFF:
-            g.motorOn = false;
+            // g.motorOn = false;
             enable_pwm(DRIVE_FWD_CHANNEL,DRIVE_REV_CHANNEL,0);
             break;
         case E_SWITCH_MOTOR_DIRECTION:
@@ -494,6 +514,7 @@ void activateEvent(EventName name, int arg1, int arg2)
             break;
         case E_SET_MOTOR_SPEED:
             setParam(MOTOR_SPEED,arg1);
+            // enable_pwm(DRIVE_FWD_CHANNEL,DRIVE_REV_CHANNEL,arg1);
             break;
         case E_START_TIMER:
             g.timerStart = millis();
@@ -663,7 +684,9 @@ void triggerMenuAction(Menu m)
     case SLOW_DRIVE_TEST:
         _SPEED(p(MOTOR_SPEED_FAST));
         _SEQ_A(S_NEXT_TAPE_SKIP_1,p(SENSOR_SIDE));
-        _SPEED_C(D_SKIP_1,p(MOTOR_SPEED_SLOW));
+        // _SPEED_C(D_SKIP_1,p(MOTOR_SPEED_SLOW));
+        _EVT_CA(D_SKIP_1,E_MOTOR_PWM_ON,param(MOTOR_SPEED_SLOW));
+        // _EVT_CA(D_SKIP_1,E_MOTOR_PWM_ON,p(MOTOR_SPEED_SLOW));
         break;
 
     #if ROBOT == 1

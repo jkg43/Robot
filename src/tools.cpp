@@ -19,15 +19,31 @@ void pwmSetup(PWMChannel channel, int pin, int frequency, int resolutionBits)
 
 Condition getSensorCondition(Side s)
 {
-    if(s == SIDE_LEFT)
+    if(s == SIDE_LEFT || s == SIDE_LEFT_DONT_ENABLE)
     {
         return C_LEFT_TAPE_SENSOR;
     }
-    if(s == SIDE_RIGHT)
+    if(s == SIDE_RIGHT || s == SIDE_RIGHT_DONT_ENABLE)
     {
         return C_RIGHT_TAPE_SENSOR;
     }
     return C_NONE;
+}
+
+Side convertSideToDontEnable(Side s)
+{
+    if(s == SIDE_LEFT_DONT_ENABLE || s == SIDE_RIGHT_DONT_ENABLE)
+    {
+        return s;
+    }
+    else if(s == SIDE_LEFT)
+    {
+        return SIDE_LEFT_DONT_ENABLE;
+    }
+    else
+    {
+        return SIDE_RIGHT_DONT_ENABLE;
+    }
 }
 
 void moveArmTimed(int delay, int prevPos, int newPos, int timeMS)
