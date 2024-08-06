@@ -18,7 +18,8 @@ unordered_map<Menu,MenuItem> menus = {
     {REPEAT_PERIOD,{"Repeat Period",100,10,20,500,true}},
     {LED_TEST,{"LED Test"}},
     {MOTOR_SPEED,{"Motor Speed",0,16,-4096,4096,true}},
-    {MOTOR_SPEED_SLOW,{"Motor Speed Slow",0,8,-4096,4096,true}},
+    {MOTOR_SPEED_SLOW,{"Motor Speed Slow",0,8,0,4096,true}},
+    {MOTOR_SPEED_FAST,{"Motor Speed Fast",0,8,0,4096,true}},
     {SWITCH_MOTOR_DIR,{"Switch Motor Direction"}},
     {EVENT_TEST,{"Event Test"}},
     {MOTOR_TEST_TIME,{"Motor Time Test Seconds",2,1,1,10,true}},
@@ -75,6 +76,7 @@ unordered_map<Menu,MenuItem> menus = {
     {PLACE_FOOD_ARM_POS,{"Place Food Arm Pos",90,2,0,180,true}},
     {PLACE_FOOD_PUSHER_POS,{"Place Food Pusher Pos",90,2,0,180,true}},
     {CLEAR_EVENTS,{"RESET"}},
+    {SLOW_DRIVE_TEST,{"Slow Drive Test"}},
 
     #if ROBOT == 1
     {GRAB_PLATE,{"Grab Plate"}},
@@ -148,14 +150,17 @@ unordered_map<Menu,vector<Menu>> subMenus = {
         CLEAR_EVENTS,
     }},
     {SM_DRIVE,{
-        MOTOR_SPEED,
-        SWITCH_MOTOR_DIR,
+        // MOTOR_SPEED,
+        // SWITCH_MOTOR_DIR,
+        MOTOR_SPEED_FAST,
         MOTOR_SPEED_SLOW,
+        SLOW_DRIVE_TEST,
         MOTOR_TEST_TIME,
         MOTOR_TEST_ACTIVATE,
         MOTOR_TEST_FULL,
         REVERSE_DRIVE_DELAY,
         REVERSE_DRIVE_POWER,
+        MOTOR_SPEED,
 
         SM_MAIN,
     }},

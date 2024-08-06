@@ -40,5 +40,8 @@
 #define _SWITCH _EVT(E_SWITCH_MOTOR_DIRECTION)
 #define _SWITCH_C(cond) _EVT_C(cond,E_SWITCH_MOTOR_DIRECTION)
 
+#define _SPEED(speed) _EVT_A(E_SET_MOTOR_SPEED,speed)
+#define _SPEED_C(cond,speed) _EVT_CA(cond,E_SET_MOTOR_SPEED,speed)
+
 #define p(par) param(par)
 #define pARM param(ARM_MOVE_TIME)

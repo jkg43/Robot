@@ -13,6 +13,10 @@ struct Globals
 
     bool motorOn = false;
 
+    unsigned long timer = 0;
+    unsigned long timerStart = 0;
+
+
     // int armPos = 90;
 
     bool handoffReady = false;

@@ -14,6 +14,7 @@ enum Menu
     REPEAT_PERIOD,
     MOTOR_SPEED,
     MOTOR_SPEED_SLOW,
+    MOTOR_SPEED_FAST,
     SWITCH_MOTOR_DIR,
     LED_TEST,
     EVENT_TEST,
@@ -71,6 +72,7 @@ enum Menu
     PLACE_FOOD_ARM_POS, 
     PLACE_FOOD_PUSHER_POS,
     CLEAR_EVENTS,
+    SLOW_DRIVE_TEST,
     
     #if ROBOT == 1
     GRAB_PLATE,
@@ -131,6 +133,10 @@ enum EventName
     E_SEND_BT,
     E_HANDOFF_DONE,
     E_CLEAR_EVENTS,
+    //arg1 is the value to set motor speed to, -4096 to 4096
+    E_SET_MOTOR_SPEED,
+    E_START_TIMER,
+    E_STOP_TIMER,
 };
 
 
@@ -185,6 +191,8 @@ enum Sequence
     //arg should be either 1 or -1 to indicate the direction of delta 
     //  relative to current movement direction
     S_HANDOFF_DELTA,
+    //arg should be a Side indicating which side of sensor to use
+    S_TIMED_STOP,
     S_STAGE_0,
     S_STAGE_1,
     S_STAGE_2,

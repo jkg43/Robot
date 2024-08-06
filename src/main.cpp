@@ -222,6 +222,9 @@ void customDisplay(Menu p)
         case STAGES:
             display_handler.printf("Stage: %d",g.stage);
             break;
+        case MOTOR_SPEED:
+            display_handler.println("\nDo not change this parameter");
+            break;
 
         #if ROBOT == 3
         case ACTIVATE_DEBUG_PIN:

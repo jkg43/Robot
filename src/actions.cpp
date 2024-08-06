@@ -148,11 +148,13 @@ void activateSequence(Sequence s, int arg)
 
             _END_SEQ_T(13000,D_GRAB_PLATE);
             break;
-        case S_GOTO_SERVING_AREA: //TODO - use difference in time between plates and cooking to align
-            _EVT_A(E_MOTOR_PWM_ON,param(MOTOR_SPEED));
-            _EVT_T(param(SERVING_AREA_TIME),E_MOTOR_PWM_OFF);
+        case S_GOTO_SERVING_AREA:
+            _EVT_A(E_MOTOR_PWM_ON,param(MOTOR_SPEED_FAST) * -1);
+            _EVT(E_START_TIMER);
+            _EVT_C(C_LEFT_TAPE_SENSOR,E_STOP_TIMER);
+            _SEQ_CA(C_LEFT_TAPE_SENSOR,S_TIMED_STOP,SIDE_LEFT);
 
-            _END_SEQ_T(10000,D_GOTO_SERVING);
+            _END_SEQ_T(6000,D_GOTO_SERVING);
             break;
         case S_SERVE_BURGER:
             moveArmTimed(0,ARM_DEFAULT,ARM_MIN,p(ARM_MOVE_TIME));
@@ -176,9 +178,13 @@ void activateSequence(Sequence s, int arg)
 
             _END_SEQ_T(20000 + p(BURGER_SERVING_TIME),D_SERVE_BURGER);
             break;
+        case S_TIMED_STOP:
+            _EVT_T(g.timer,E_MOTOR_PWM_OFF);
+            break;
+            
         #if ROBOT == 1
         case S_HANDOFF_DELTA:
-            _EVT_A(E_MOTOR_PWM_ON,param(MOTOR_SPEED) * sign(param(HANDOFF_DELTA)) * arg);
+            _EVT_A(E_MOTOR_PWM_ON,param(MOTOR_SPEED_FAST) * sign(param(HANDOFF_DELTA)) * arg);
             _EVT_T(abs(param(HANDOFF_DELTA)),E_MOTOR_PWM_OFF);
             _END_SEQ_T(abs(param(HANDOFF_DELTA)),D_HANDOFF_DELTA);
             break;
@@ -192,7 +198,8 @@ void activateSequence(Sequence s, int arg)
         //START WITH LEFT SENSOR IN FRONT OF TAPE
         case S_STAGE_0:
             g.stage = 0;
-            _SEQ_A(S_NEXT_TAPE,SIDE_LEFT); //go to cutting
+            _SPEED(p(MOTOR_SPEED_FAST));
+            _SEQ_TA(1,S_NEXT_TAPE,SIDE_LEFT); //go to cutting
 
             _SEQ_CA(D_STOP,S_HANDOFF_DELTA,1); //handoff delta
 
@@ -283,6 +290,7 @@ void activateSequence(Sequence s, int arg)
         
         //CHEESE PLATE ROUTINE
         case S_CHEESE_PLATE_STAGE_0:
+            _SPEED(p(MOTOR_SPEED_FAST));
             _SEQ_A(S_GRAB_FOOD,SIDE_RIGHT); //grab cheese
 
             _SEQ_CT(1,D_GRAB_FOOD,S_CHEESE_PLATE_STAGE_1);
@@ -307,6 +315,7 @@ void activateSequence(Sequence s, int arg)
 
         //SALAD PLATE ROUTINE
         case S_SALAD_PLATE_STAGE_0:
+            _SPEED(p(MOTOR_SPEED_FAST));
             _SEQ_A(S_GRAB_FOOD,SIDE_LEFT); //grab tomato
 
             _SEQ_CT(1,D_GRAB_FOOD,S_SALAD_PLATE_STAGE_1);
@@ -340,9 +349,10 @@ void activateSequence(Sequence s, int arg)
         //START WITH LEFT SENSOR BEHIND TAPE
         case S_STAGE_0:
             g.stage = 0;
-            _SEQ_A(S_MOVE_2_GRAB,SIDE_LEFT); //grab top bun
+            _SPEED(p(MOTOR_SPEED_FAST));
+            _SEQ_TA(1,S_MOVE_2_GRAB,SIDE_LEFT); //grab top bun
 
-            _SEQ_CT(1,D_MOVE_2_GRAB,S_STAGE_1);
+            _SEQ_CT(2,D_MOVE_2_GRAB,S_STAGE_1);
             break;
         case S_STAGE_1:
             g.stage = 1;
@@ -482,6 +492,15 @@ void activateEvent(EventName name, int arg1, int arg2)
         case E_HANDOFF_DONE:
             g.handoffReady = false;
             break;
+        case E_SET_MOTOR_SPEED:
+            setParam(MOTOR_SPEED,arg1);
+            break;
+        case E_START_TIMER:
+            g.timerStart = millis();
+            break;
+        case E_STOP_TIMER:
+            g.timer = millis() - g.timerStart;
+            break;
     }
 }
 
@@ -545,10 +564,10 @@ void triggerMenuAction(Menu m)
         addEvent(0,E_SWITCH_MOTOR_DIRECTION);
         break;
     case MOTOR_TEST_ACTIVATE:
-        addEvent(1000,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
+        addEvent(1000,E_MOTOR_PWM_ON,param(MOTOR_SPEED_FAST));
         addEvent(1000+param(MOTOR_TEST_TIME) * 1000,E_MOTOR_PWM_OFF);
 
-        addEvent(1500+1000*param(MOTOR_TEST_TIME),E_MOTOR_PWM_ON,param(MOTOR_SPEED) * -1);
+        addEvent(1500+1000*param(MOTOR_TEST_TIME),E_MOTOR_PWM_ON,param(MOTOR_SPEED_FAST) * -1);
         addEvent(1500+2000*param(MOTOR_TEST_TIME),E_MOTOR_PWM_OFF);
 
         break;
@@ -556,7 +575,7 @@ void triggerMenuAction(Menu m)
         g.fullMotorOn = !g.fullMotorOn;
         if(g.fullMotorOn)
         {
-            addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED));
+            addEvent(0,E_MOTOR_PWM_ON,param(MOTOR_SPEED_FAST));
             addEvent(0,E_LED_ON);
         }
         else
@@ -638,6 +657,15 @@ void triggerMenuAction(Menu m)
     case SEND_HANDOFF_SIGNAL:
         _EVT_A(E_SEND_BT,BT_HANDOFF_READY);
         break;
+    case CLEAR_EVENTS:
+        _EVT(E_CLEAR_EVENTS);
+        break;
+    case SLOW_DRIVE_TEST:
+        _SPEED(p(MOTOR_SPEED_FAST));
+        _SEQ_A(S_NEXT_TAPE_SKIP_1,p(SENSOR_SIDE));
+        _SPEED_C(D_SKIP_1,p(MOTOR_SPEED_SLOW));
+        break;
+
     #if ROBOT == 1
     case GRAB_PLATE:
         _SEQ_T(3000,S_GRAB_PLATE);
@@ -647,9 +675,6 @@ void triggerMenuAction(Menu m)
         break;
     case SALAD_PLATE:
         _SEQ_T(3000,S_SALAD_PLATE_STAGE_0);
-        break;
-    case CLEAR_EVENTS:
-        _EVT(E_CLEAR_EVENTS);
         break;
     #elif ROBOT == 2
     case PLACE_FOOD:
