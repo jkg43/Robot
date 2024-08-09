@@ -28,6 +28,10 @@ enum Menu
     REVERSE_DRIVE_TIME,
     REVERSE_DRIVE_POWER,
     REVERSE_DRIVE_DELAY,
+    REVERSE_DELAY_SLOW,
+    REVERSE_POWER_SLOW,
+    REVERSE_DELAY_FAST,
+    REVERSE_POWER_FAST,
     FLIPPER_POS,
     SET_FLIPPER_POS,
     ARM_POS,
@@ -73,6 +77,22 @@ enum Menu
     PLACE_FOOD_PUSHER_POS,
     CLEAR_EVENTS,
     SLOW_DRIVE_TEST,
+    PUSHER_MOVE_TIME,
+    BRIDGE_HOLD_TIME,
+    BRIDGE_RAISE_TIME,
+    HOLD_BRIDGE,
+    RAISE_BRIDGE,
+    HOLD_BRIDGE_POWER,
+    RAISE_BRIDGE_POWER,
+    SERVING_AREA_TIME_MULTIPLIER,
+    FLIP_TIME,
+    BRIDGE_TEST,
+    BRIDGE_RAISE_HOLD,
+    BRIDGE_RELEASE_TIME,
+    RELEASE_BRIDGE,
+    PREP_RUN,
+    PLATE_GRAB_ARM_TIME,
+    SALAD_BURGER,
     
     #if ROBOT == 1
     GRAB_PLATE,
@@ -95,6 +115,8 @@ enum Menu
     SM_BT,
     SM_SEQUENCES,
     SM_ESP,
+    SM_BRIDGE,
+    SM_IMPORTANT,
 
 };
 
@@ -112,6 +134,7 @@ enum EventName
     E_SWITCH_MOTOR_DIRECTION,
     //arg1 is degrees, 0 to 180
     E_SET_FLIPPER_POS,
+    E_DISABLE_FLIPPER,
     //arg1 is degrees, -180 to 360
     E_SET_ARM_POS,
     //arg1 is degrees, -180 to 360
@@ -133,10 +156,14 @@ enum EventName
     E_SEND_BT,
     E_HANDOFF_DONE,
     E_CLEAR_EVENTS,
-    //arg1 is the value to set motor speed to, -4096 to 4096
+    //arg1 is the Speed, either SPEED_FAST or SPEED_SLOW
+    //arg2 is a multiplier
     E_SET_MOTOR_SPEED,
     E_START_TIMER,
     E_STOP_TIMER,
+    //arg1 is the motor power, duty cycle out of 4096
+    E_BRIDGE_PWM_ON,
+    E_BRIDGE_PWM_OFF,
 };
 
 
@@ -157,6 +184,8 @@ enum Condition
     D_GRAB_FOOD,
     D_MOVE_1_GRAB,
     D_MOVE_2_GRAB,
+    D_MOVE_1_PRE_GRAB,
+    D_MOVE_2_PRE_GRAB,
     C_HANDOFF_READY,
     D_PLACE_FOOD,
     D_GRAB_PLATE,
@@ -166,6 +195,7 @@ enum Condition
     D_MAKE_BURGER,
     D_MAKE_CHEESE_PLATE,
     D_MAKE_SALAD,
+    D_PREP_RUN,
 };
 
 enum Sequence
@@ -182,13 +212,24 @@ enum Sequence
     S_ENDURANCE_TEST,
     //arg is the Side to grab from
     S_GRAB_FOOD,
+    //arg is the Side to grab from
+    S_PRE_GRAB_FOOD,
+    //arg is the Side to grab from
+    S_GRAB_FOOD_1,
+    //arg is the Side to grab from
+    S_GRAB_FOOD_2,
     S_GRAB_PLATE,
     S_GRAB_CONTINUOUS,
     //arg is the Side to detect and grab from
     S_MOVE_1_GRAB,
     //arg is the Side to detect and grab from
     S_MOVE_2_GRAB,
+    //arg is the Side to detect and grab from
+    S_MOVE_1_PRE_GRAB,
+    //arg is the Side to detect and grab from
+    S_MOVE_2_PRE_GRAB,
     S_PLACE_FOOD,
+    //handles speed
     S_GOTO_SERVING_AREA,
     S_SERVE_BURGER,
     //arg should be either 1 or -1 to indicate the direction of delta 
@@ -196,6 +237,11 @@ enum Sequence
     S_HANDOFF_DELTA,
     //arg should be a Side indicating which side of sensor to use
     S_TIMED_STOP,
+    S_RAISE_BRIDGE,
+    S_RELEASE_BRIDGE,
+    S_PREP_RUN,
+
+
     S_STAGE_0,
     S_STAGE_1,
     S_STAGE_2,
@@ -221,6 +267,7 @@ enum BTCommands
 {
     BT_LED = 'L',
     BT_HANDOFF_READY = 'H',
+    BT_START_BURGER = 'B',
 };
 
 
@@ -260,6 +307,12 @@ enum Side
     SIDE_RIGHT_DONT_ENABLE = 3,
 };
 
+enum Speed
+{
+    SPEED_FAST,
+    SPEED_SLOW,
+};
+
 enum PWMChannel
 {
     DRIVE_FWD_CHANNEL = 0,
@@ -268,4 +321,5 @@ enum PWMChannel
     ARM_CHANNEL = 3,
     PUSHER_RIGHT_CHANNEL = 4,
     PUSHER_LEFT_CHANNEL = 5,
+    BRIDGE_MOTOR_CHANNEL = 6,
 };

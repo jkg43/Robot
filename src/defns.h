@@ -5,7 +5,7 @@
 
 
 //SCREEN DEFNS
-#define SCREEN_WIDTH 128 // OLED display width, in pixels65
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET 	-1 // This display does not have a reset pin accessible
 
@@ -27,6 +27,7 @@ const int buttonPins[3] = {26,32,14};
 #define MOTOR_PWM_RESOLUTION 4096
 #define DRIVE_MOTOR_FWD_PIN 19
 #define DRIVE_MOTOR_REV_PIN 20
+#define BRIGE_MOTOR_PIN 33
 
 //SERVO DEFNS
 #define SERVO_PWM_FREQ 50
@@ -37,8 +38,6 @@ const int buttonPins[3] = {26,32,14};
 #define ARM_SERVO_PIN_2 4
 #define PUSHER_1_PIN 13
 #define PUSHER_2_PIN 12
-// #define PUSHER_1_DEFAULT_STATE 90
-// #define PUSHER_2_DEFAULT_STATE 90
 
 #if ROBOT == 1
 #define ARM_DEFAULT 90
@@ -49,3 +48,7 @@ const int buttonPins[3] = {26,32,14};
 #define ARM_MIN 40
 #define ARM_MAX 130 
 #endif
+
+//SEQUENCE DEFNS
+#define MAX_CHEESE_PLATES 4
+#define MAX_SALAD_PLATES 5

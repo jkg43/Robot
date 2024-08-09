@@ -16,3 +16,4 @@ void activateSequence(Sequence s, int arg);
 //CUSTOM
 void enable_pwm(PWMChannel fwd_channel,PWMChannel rev_channel,int pwmVal);
 void set_servo(int channel, int degrees);
+void set_servo_strong(int channel, int degrees);

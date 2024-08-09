@@ -77,9 +77,12 @@ void clearEvents()
     g.enableLed = false;
     g.motorOn = false;
     g.fullMotorOn = false;
+    g.bridgeMotorOn = false;
     g.handoffReady = false;
     g.timer = 0;
     g.timerStart = 0;
+    g.numCheesePlates = 0;
+    g.numSaladPlates = 0;
     
     
 }

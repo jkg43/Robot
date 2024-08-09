@@ -3,6 +3,7 @@
 #include "defns.h"
 #include "event.h"
 #include "globals.h"
+#include "macros.h"
 
 extern Globals g;
 
@@ -74,6 +75,9 @@ void updateBT()
         case BT_HANDOFF_READY:
             g.handoffReady = true;
             processEvents(C_HANDOFF_READY);
+            break;
+        case BT_START_BURGER:
+            _SEQ(S_STAGE_0);
             break;
     }
 

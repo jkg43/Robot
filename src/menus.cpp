@@ -32,6 +32,10 @@ unordered_map<Menu,MenuItem> menus = {
     {REVERSE_DRIVE_TIME,{"Reverse Drive Time MS",50,10,10,5000,true}},
     {REVERSE_DRIVE_POWER,{"Reverse Drive Power (%)",50,2,0,100,true}},
     {REVERSE_DRIVE_DELAY,{"Reverse Drive Delay MS",50,10,10,5000,true}},
+    {REVERSE_POWER_SLOW,{"Slow Rev Power (%)",100,2,0,100,true}},
+    {REVERSE_DELAY_SLOW,{"Slow Rev Delay MS",50,10,10,5000,true}},
+    {REVERSE_POWER_FAST,{"Fast Rev Power (%)",70,2,0,100,true}},
+    {REVERSE_DELAY_FAST,{"Fast Rev Delay MS",150,10,10,5000,true}},
     {FLIPPER_POS,{"Flipper Pos",0,10,0,180,true}},
     {SET_FLIPPER_POS,{"Set Flipper Pos"}},
     {ARM_POS,{"Arm Pos",0,2,-180,360,true}},
@@ -56,6 +60,8 @@ unordered_map<Menu,MenuItem> menus = {
     {BURGER_SERVING_TIME,{"Burger Serving Time MS",5000,100,0,20000,true}},
     {SERVE_BURGER,{"Serve Burger"}},
     {ARM_MOVE_TIME,{"Arm Move Time MS",2000,25,0,10000,true}},
+    {PLATE_GRAB_ARM_TIME,{"Plate Grab Arm Time",2000,25,0,10000,true}},
+    {PUSHER_MOVE_TIME,{"Pusher Move Time MS",1000,10,0,10000,true}},
     {SEND_HANDOFF_SIGNAL,{"Send Handoff Signal"}},
     {TIMED_MOVE_DIVISIONS,{"Timed Move Divisions",20,1,0,100,true}},
     {DISABLE_PUSHER_1,{"Disable Pusher 1"}},
@@ -77,6 +83,20 @@ unordered_map<Menu,MenuItem> menus = {
     {PLACE_FOOD_PUSHER_POS,{"Place Food Pusher Pos",90,2,0,180,true}},
     {CLEAR_EVENTS,{"RESET"}},
     {SLOW_DRIVE_TEST,{"Slow Drive Test"}},
+    {BRIDGE_HOLD_TIME,{"Bridge Hold Time",1000,25,0,10000,true}},
+    {BRIDGE_RAISE_TIME,{"Bridge Raise Time",5000,25,0,20000,true}},
+    {BRIDGE_RELEASE_TIME,{"Bridge Release Time",500,10,0,20000,true}},
+    {HOLD_BRIDGE,{"Hold Bridge"}},
+    {RAISE_BRIDGE,{"Raise Bridge"}},
+    {HOLD_BRIDGE_POWER,{"Hold Bridge Power",0,8,0,4096,true}},
+    {RAISE_BRIDGE_POWER,{"Raise Bridge Power",0,8,0,4096,true}},
+    {SERVING_AREA_TIME_MULTIPLIER,{"Multiplier - Serving Area Time(%)",100,5,0,500,true}},
+    {FLIP_TIME,{"Flip Time",3000,25,0,10000,true}},
+    {BRIDGE_TEST,{"Bridge Test"}},
+    {BRIDGE_RAISE_HOLD,{"Raise and Hold Bridge"}},
+    {RELEASE_BRIDGE,{"Release Bridge"}},
+    {PREP_RUN,{"Prep Run"}},
+    {SALAD_BURGER,{"Salad Burger"}},
 
     #if ROBOT == 1
     {GRAB_PLATE,{"Grab Plate"}},
@@ -101,6 +121,8 @@ unordered_map<Menu,MenuItem> menus = {
     {SM_BT,{"Bluetooth Settings"}},
     {SM_SEQUENCES,{"Sequences"}},
     {SM_ESP,{"ESP Settings"}},
+    {SM_BRIDGE,{"Drawbridge Settings"}},
+    {SM_IMPORTANT,{"Important Settings"}},
 
 }; //map is unordered, menu order depends on submenu vectors below
 
@@ -115,7 +137,7 @@ variable:
 action:
 -create a new Menu in types.h
 -add a new case to the switch statement in triggerAction in actions.cpp
--add an entry to the map above with the name of the actiont
+-add an entry to the map above with the name of the action
 
 
 TO CREATE A NEW EVENT:
@@ -127,8 +149,8 @@ TO ADD A NEW SUBMENU:
 -create a new Menu with the SM_ prefix
 -add an entry to the menus map above to allow access to it
 -add it into the subMenus map below and fill with the desired menus
--add code to access the submenu in triggerAction
 -make sure to add it to the main submenu
+-add code to access the submenu in triggerMenuAction
 
 */
 
@@ -138,29 +160,50 @@ TO ADD A NEW SUBMENU:
 
 unordered_map<Menu,vector<Menu>> subMenus = {
     {SM_MAIN,{
+        SM_IMPORTANT,
         SM_DRIVE,
         SM_SENSORS,
         SM_ARM,
         SM_PUSHERS,
         SM_GRAB,
+        SM_BRIDGE,
         SM_BT,
         SM_SEQUENCES,
         SM_ESP,
 
         CLEAR_EVENTS,
     }},
-    {SM_DRIVE,{
-        // MOTOR_SPEED,
-        // SWITCH_MOTOR_DIR,
+    {SM_IMPORTANT,{
+        RAISE_BRIDGE,
+        STAGES,
+        #if ROBOT == 1
+        SALAD_PLATE,
+        CHEESE_PLATE,
+        SALAD_BURGER,
+        #endif
+        BT_CONNECT,
+        TAPE_SENSOR_THRESHOLD,
         MOTOR_SPEED_FAST,
         MOTOR_SPEED_SLOW,
+
+        SM_MAIN,
+    }},
+    {SM_DRIVE,{
+        MOTOR_SPEED_FAST,
+        MOTOR_SPEED_SLOW,
+        REVERSE_DELAY_SLOW,
+        REVERSE_POWER_SLOW,
+        REVERSE_DELAY_FAST,
+        REVERSE_POWER_FAST,
+        
         SLOW_DRIVE_TEST,
         MOTOR_TEST_TIME,
         MOTOR_TEST_ACTIVATE,
         MOTOR_TEST_FULL,
+        
+        MOTOR_SPEED,
         REVERSE_DRIVE_DELAY,
         REVERSE_DRIVE_POWER,
-        MOTOR_SPEED,
 
         SM_MAIN,
     }},
@@ -183,6 +226,7 @@ unordered_map<Menu,vector<Menu>> subMenus = {
         SET_PUSHER_2_POS,
         PUSHER_LEFT_DEFAULT_STATE,
         DISABLE_PUSHER_2,
+        PUSHER_MOVE_TIME,
 
         SM_MAIN,
     }},
@@ -205,6 +249,7 @@ unordered_map<Menu,vector<Menu>> subMenus = {
         LEFT_GRAB_PUSHER_POS,
         RIGHT_GRAB_PUSHER_POS,
         BURGER_SERVING_TIME,
+        FLIP_TIME,
         BURGER_SERVE_ARM_POS,
         BURGER_SERVE_PUSHER_POS,
         SERVE_BURGER,
@@ -215,11 +260,29 @@ unordered_map<Menu,vector<Menu>> subMenus = {
         PLATE_GRAB_ARM_POS_2,
         PLATE_GRAB_PUSHER_POS,
         PLATE_GRAB_DELTA,
+        PLATE_GRAB_ARM_TIME,
         #elif ROBOT == 2
         PLACE_FOOD,
         PLACE_FOOD_ARM_POS,
         PLACE_FOOD_PUSHER_POS,
         #endif
+
+        SM_MAIN,
+    }},
+    {SM_BRIDGE,{
+        RAISE_BRIDGE,
+        RELEASE_BRIDGE,
+
+        BRIDGE_RELEASE_TIME,
+        BRIDGE_HOLD_TIME,
+        BRIDGE_RAISE_TIME,
+
+        RAISE_BRIDGE_POWER,
+        HOLD_BRIDGE_POWER,
+
+        BRIDGE_RAISE_HOLD,
+        HOLD_BRIDGE,
+        BRIDGE_TEST,
 
         SM_MAIN,
     }},
@@ -234,17 +297,20 @@ unordered_map<Menu,vector<Menu>> subMenus = {
         SM_MAIN,
     }},
     {SM_SEQUENCES,{
-        ENDURANCE_TEST,
-        SERVING_AREA_TIME,
-        GOTO_SERVING_AREA,
         STAGES,
-
         #if ROBOT == 1
         CHEESE_PLATE,
         SALAD_PLATE,
+        SALAD_BURGER,
         #elif ROBOT == 2
 
         #endif
+        PREP_RUN,
+        ENDURANCE_TEST,
+        SERVING_AREA_TIME,
+        SERVING_AREA_TIME_MULTIPLIER,
+        GOTO_SERVING_AREA,
+
 
         SM_MAIN,
     }},

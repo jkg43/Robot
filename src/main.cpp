@@ -65,6 +65,7 @@ void setup()
     //MOTOR SETUP
     pwmSetup(DRIVE_FWD_CHANNEL,DRIVE_MOTOR_FWD_PIN,MOTOR_PWM_FREQ,MOTOR_PWM_BITS);
     pwmSetup(DRIVE_REV_CHANNEL,DRIVE_MOTOR_REV_PIN,MOTOR_PWM_FREQ,MOTOR_PWM_BITS);
+    pwmSetup(BRIDGE_MOTOR_CHANNEL,BRIGE_MOTOR_PIN,MOTOR_PWM_FREQ,MOTOR_PWM_BITS);
 
 
     //SERVO SETUP
@@ -223,6 +224,8 @@ void customDisplay(Menu p)
             display_handler.printf("Stage: %d",g.stage);
             break;
         case MOTOR_SPEED:
+        case REVERSE_DRIVE_DELAY:
+        case REVERSE_DRIVE_POWER:
             display_handler.println("\nDo not change this parameter");
             break;
 

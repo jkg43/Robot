@@ -12,9 +12,13 @@ struct Globals
     bool inMenu = false;
 
     bool motorOn = false;
+    bool bridgeMotorOn = false;
 
     unsigned long timer = 0;
     unsigned long timerStart = 0;
+
+    int numCheesePlates = 0;
+    int numSaladPlates = 0;
 
 
     // int armPos = 90;
